@@ -200,7 +200,7 @@ int main() {
         printRow("SortedList", "optimistyczny",n, runBenchmark<SortedListPQ>(n, desc));
         printRow("SortedList", "sredni",n, runBenchmark<SortedListPQ>(n, rnd));
         printRow("SortedList", "pesymistyczny",n, runBenchmark<SortedListPQ>(n, asc));
-        cout << string(103,'-') << "\n";
+        cout<<"/n";
     }
 
     cout << R"(
