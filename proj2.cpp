@@ -13,13 +13,13 @@
 #include <iomanip>
 #include <cassert>
 using namespace std;
-using Clock  = chrono::high_resolution_clock;
-using Micros = chrono::microseconds;
-using Nanos  = chrono::nanoseconds;
+using namespace chrono;
+using Clock  = high_resolution_clock;
+using Micros = microseconds;
+using Nanos  = nanoseconds;
 
-// ============================================================
 //  1. Kopiec binarny (max-heap)
-// ============================================================
+
 template<typename T>
 class BinaryHeapPQ {
     struct Node { T value; int priority; };
@@ -113,7 +113,7 @@ template<typename Fn>
 long long measureNs(Fn fn, int reps=200) {
     auto t0=Clock::now();
     for(int i=0;i<reps;++i) fn();
-    return chrono::duration_cast<Nanos>(Clock::now()-t0).count()/reps;
+    return duration_cast<Nanos>(Clock::now()-t0).count()/reps;
 }
 
 template<template<typename> class PQ>
@@ -124,7 +124,7 @@ Result runBenchmark(int n, const vector<int>& order) {
     { PQ<int> pq;
       auto t0=Clock::now();
       for(int i=0;i<n;++i) pq.push(i,order[i]);
-      r.push_us=chrono::duration_cast<Micros>(Clock::now()-t0).count(); }
+      r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); }
 
     // wypełniona kolejka do pozostałych testów
     PQ<int> pq;
@@ -136,56 +136,55 @@ Result runBenchmark(int n, const vector<int>& order) {
     // changePriority
     { auto t0=Clock::now();
       for(int rep=0;rep<10;++rep) pq.changePriority(n/2, 2'000'000+rep);
-      r.change_us=chrono::duration_cast<Micros>(Clock::now()-t0).count()/10; }
+      r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10; }
 
     // pop
     { PQ<int> pq2; for(int i=0;i<n;++i) pq2.push(i,order[i]);
       auto t0=Clock::now();
       while(!pq2.empty()) pq2.pop();
-      r.pop_us=chrono::duration_cast<Micros>(Clock::now()-t0).count(); }
+      r.pop_us=duration_cast<Micros>(Clock::now()-t0).count(); }
 
     return r;
 }
 
-// ============================================================
 //  Wydruk
-// ============================================================
 void printHeader() {
-    cout << left
-        << setw(22)<<"Struktura" << setw(15)<<"Przypadek"
-        << setw(8) <<"N"         << setw(14)<<"push [µs]"
-        << setw(14)<<"pop [µs]"  << setw(14)<<"peek [ns]"
-        << setw(14)<<"size [ns]" << setw(16)<<"chgPri [µs]"
-        << "\n" << string(103,'-') << "\n";
+    cout <<"Struktura   Przypadek        N        push [µs]     pop [µs]      peek [ns]     size [ns]     chgPri [µs]\n\n";
 }
 void printRow(const string& name, const string& cas, int n, const Result& r) {
-    cout << left
-        << setw(22)<<name    << setw(15)<<cas
-        << setw(8) <<n       << setw(14)<<r.push_us
-        << setw(14)<<r.pop_us<< setw(14)<<r.peek_ns
-        << setw(14)<<r.size_ns<<setw(16)<<r.change_us << "\n";
+    cout<<name<<setw(15)<<cas<<setw(8)<<n<<setw(14)<<r.push_us<<setw(14)<<r.pop_us<<setw(14)<<r.peek_ns<<setw(14)<<r.size_ns<<setw(16)<<r.change_us<<"\n";
 }
 
-// ============================================================
 //  main
-// ============================================================
 int main() {
     // Testy jednostkowe (makro pomocnicze)
     auto test = [](auto& pq, const char* name) {
-        pq.push(3,3); pq.push(1,1); pq.push(5,5); pq.push(2,2);
-        assert(pq.peek().second==5); pq.pop();
-        assert(pq.peek().second==3); pq.changePriority(1,10);
+        pq.push(3,3);
+        pq.push(1,1);
+        pq.push(5,5);
+        pq.push(2,2);
+        assert(pq.peek().second==5);
+        pq.pop();
+        assert(pq.peek().second==3);
+        pq.changePriority(1,10);
         assert(pq.peek().second==10 && pq.size()==3);
         cout << "[OK] " << name << "\n";
     };
-    { BinaryHeapPQ<int> pq; test(pq,"BinaryHeap"); }
-    { SortedArrayPQ<int> pq; test(pq,"SortedArray"); }
-    { SortedListPQ<int>  pq; test(pq,"SortedList");  }
+    {
+        BinaryHeapPQ<int> pq; 
+        test(pq,"BinaryHeap"); 
+    }
+    {
+        SortedArrayPQ<int> pq;
+        test(pq,"SortedArray"); 
+    }
+    {
+        SortedListPQ<int>  pq;
+        test(pq,"SortedList");
+    }
     cout << "\n";
-
     mt19937 rng(12345);
     printHeader();
-
     for (int n : {1000, 10000, 100000}) {
         vector<int> asc(n), desc(n), rnd(n);
         iota(asc.begin(), asc.end(), 0);
@@ -206,7 +205,6 @@ int main() {
 
     cout << R"(
 Operacja          BinaryHeap      SortedArray     SortedList
------------------------------------------------------------------T
 push              O(log n)        O(n)            O(n)
 pop               O(log n)        O(1)            O(1)
 peek              O(1)            O(1)            O(1)
