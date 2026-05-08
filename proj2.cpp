@@ -18,8 +18,6 @@ using Clock  = high_resolution_clock;
 using Micros = microseconds;
 using Nanos  = nanoseconds;
 
-//  1. Kopiec binarny (max-heap)
-
 template<typename T>
 class BinaryHeapPQ {
     struct Node { T value; int priority; };
@@ -53,35 +51,42 @@ public:
                                   p>old ? siftUp(i) : siftDown(i); return; }
     }
 };
-
-// ============================================================
-//  2. Posortowana tablica (najwyższy z tyłu)
-// ============================================================
 template<typename T>
 class SortedArrayPQ {
-    struct Node { T value; int priority; };
+    struct Node {
+        T value;
+        int priority; 
+    };
     vector<Node> arr;
-
 public:
     void push(T v, int p) {
-        auto it = lower_bound(arr.begin(), arr.end(), p,
-            [](const Node& a, int b){ return a.priority < b; });
+        auto it = lower_bound(arr.begin(), arr.end(), p, [](const Node& a, int b){ return a.priority < b; });
         arr.insert(it, {v,p});
     }
-    void pop()                   { arr.pop_back(); }
-    pair<T,int> peek()const { return {arr.back().value, arr.back().priority}; }
-    int  size() const            { return arr.size(); }
-    bool empty()const            { return arr.empty(); }
+    void pop(){
+        arr.pop_back();
+    }
+    pair<T,int> peek() const {
+        return {arr.back().value, arr.back().priority}; 
+    }
+    int  size() const{ 
+        return arr.size();
+    }
+    bool empty() const{ 
+        return arr.empty();
+    }
 
     void changePriority(T v, int p) {
-        for (auto it=arr.begin(); it!=arr.end(); ++it)
-            if (it->value==v) { arr.erase(it); push(v,p); return; }
+        for (auto it=arr.begin(); it!=arr.end(); ++it){
+            if (it->value==v) {
+                arr.erase(it);
+                push(v,p);
+                return; 
+            }
+        }
     }
 };
 
-// ============================================================
-//  3. Posortowana lista dwukierunkowa (najwyższy z przodu)
-// ============================================================
 template<typename T>
 class SortedListPQ {
     struct Node { T value; int priority; };
@@ -90,13 +95,23 @@ class SortedListPQ {
 public:
     void push(T v, int p) {
         auto it = lst.begin();
-        while (it!=lst.end() && it->priority>=p) ++it;
+        while (it!=lst.end() && it->priority>=p){ 
+            ++it;
+        };
         lst.insert(it, {v,p});
     }
-    void pop()                   { lst.pop_front(); }
-    pair<T,int> peek()const { return {lst.front().value, lst.front().priority}; }
-    int  size() const            { return lst.size(); }
-    bool empty()const            { return lst.empty(); }
+    void pop(){ 
+        lst.pop_front(); 
+    }
+    pair<T,int> peek() const { 
+        return {lst.front().value, lst.front().priority}; 
+    }
+    int  size() const{ 
+        return lst.size(); 
+    }
+    bool empty() const{ 
+        return lst.empty(); 
+    }
 
     void changePriority(T v, int p) {
         for (auto it=lst.begin(); it!=lst.end(); ++it)
@@ -119,23 +134,28 @@ long long measureNs(Fn fn, int reps=200) {
 template<template<typename> class PQ>
 Result runBenchmark(int n, const vector<int>& order) {
     Result r{};
-
     // push
     { PQ<int> pq;
       auto t0=Clock::now();
-      for(int i=0;i<n;++i) pq.push(i,order[i]);
-      r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); }
+      for(int i=0;i<n;++i) {
+        pq.push(i,order[i]);
+      }
+      r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); 
+    }
 
     // wypełniona kolejka do pozostałych testów
     PQ<int> pq;
-    for(int i=0;i<n;++i) pq.push(i,order[i]);
-
+    for(int i=0;i<n;++i) {
+        pq.push(i,order[i]);
+    }
     r.peek_ns  = measureNs([&]{ volatile auto x=pq.peek();  (void)x; });
     r.size_ns  = measureNs([&]{ volatile int  s=pq.size();  (void)s; });
 
     // changePriority
     { auto t0=Clock::now();
-      for(int rep=0;rep<10;++rep) pq.changePriority(n/2, 2'000'000+rep);
+      for(int rep=0;rep<10;++rep) {
+        pq.changePriority(n/2, 2'000'000+rep);
+      }
       r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10; }
 
     // pop
