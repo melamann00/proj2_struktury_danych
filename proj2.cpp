@@ -44,20 +44,33 @@ class BinaryHeapPQ {
     }
 
 public:
-    void push(T v, int p)        { h.push_back({v,p}); siftUp(h.size()-1); }
-    void pop()                   { h[0]=h.back(); h.pop_back(); if(!h.empty()) siftDown(0); }
+    void push(T v, int p){
+        h.push_back({v,p});
+        siftUp(h.size()-1);
+    }
+    void pop(){ 
+        h[0]=h.back(); 
+        h.pop_back(); 
+        if(!h.empty()) {
+            siftDown(0);
+        } 
+    }
     pair<T,int> peek()const { return {h[0].value, h[0].priority}; }
-    int  size() const            { return h.size(); }
-    bool empty()const            { return h.empty(); }
-
+    int size() const{ 
+        return h.size();
+    }
+    bool empty() const{
+        return h.empty(); 
+    }
     void changePriority(T v, int p) {
-        for (int i=0; i<(int)h.size(); i++)
+        for (int i=0; i<(int)h.size(); i++){
             if (h[i].value==v){ 
                 int old=h[i].priority;
                 h[i].priority=p; 
                 p>old ? siftUp(i) : siftDown(i); 
                 return; 
             }
+        }
     }
 };
 template<typename T>
@@ -98,7 +111,7 @@ public:
 
 template<typename T>
 class SortedListPQ {
-    struct Node { T value; int priority; };
+   struct Node { T value; int priority; };
     list<Node> lst;
 
 public:
@@ -115,7 +128,7 @@ public:
     pair<T,int> peek() const { 
         return {lst.front().value, lst.front().priority}; 
     }
-    int  size() const{ 
+    int size() const{ 
         return lst.size(); 
     }
     bool empty() const{ 
@@ -156,7 +169,7 @@ Result Test(int n, const vector<int>& order) {
         pq.push(i,order[i]);
     }
     r.peek_ns  = measureNs([&]{ volatile auto x=pq.peek();  (void)x; });
-    r.size_ns  = measureNs([&]{ volatile int  s=pq.size();  (void)s; });
+    r.size_ns  = measureNs([&]{ volatile int s=pq.size();  (void)s; });
     //changePriority
     {
         auto t0=Clock::now();
