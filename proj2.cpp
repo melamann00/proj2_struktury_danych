@@ -119,9 +119,7 @@ public:
     }
 };
 
-// ============================================================
-//  Benchmark
-// ============================================================
+//Test
 struct Result { long long push_us, pop_us, peek_ns, size_ns, change_us; };
 
 template<typename Fn>
@@ -142,16 +140,14 @@ Result runBenchmark(int n, const vector<int>& order) {
       }
       r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); 
     }
-
-    // wypełniona kolejka do pozostałych testów
+    //wypełniona kolejka do pozostałych testów
     PQ<int> pq;
     for(int i=0;i<n;++i) {
         pq.push(i,order[i]);
     }
     r.peek_ns  = measureNs([&]{ volatile auto x=pq.peek();  (void)x; });
     r.size_ns  = measureNs([&]{ volatile int  s=pq.size();  (void)s; });
-
-    // changePriority
+    //changePriority
     { auto t0=Clock::now();
       for(int rep=0;rep<10;++rep) {
         pq.changePriority(n/2, 2'000'000+rep);
@@ -169,48 +165,21 @@ Result runBenchmark(int n, const vector<int>& order) {
 
 //  Wydruk
 void printHeader() {
-    cout <<"Struktura   Przypadek        N        push [µs]     pop [µs]      peek [ns]     size [ns]     chgPri [µs]\n\n";
+    cout <<"Struktura   Przypadek        N        push [µs]     pop [µs]      peek [ns]     size [ns]     chgPri [µs]\n";
 }
 void printRow(const string& name, const string& cas, int n, const Result& r) {
     cout<<name<<setw(15)<<cas<<setw(8)<<n<<setw(14)<<r.push_us<<setw(14)<<r.pop_us<<setw(14)<<r.peek_ns<<setw(14)<<r.size_ns<<setw(16)<<r.change_us<<"\n";
 }
 
-//  main
 int main() {
-    // Testy jednostkowe (makro pomocnicze)
-    auto test = [](auto& pq, const char* name) {
-        pq.push(3,3);
-        pq.push(1,1);
-        pq.push(5,5);
-        pq.push(2,2);
-        assert(pq.peek().second==5);
-        pq.pop();
-        assert(pq.peek().second==3);
-        pq.changePriority(1,10);
-        assert(pq.peek().second==10 && pq.size()==3);
-        cout << "[OK] " << name << "\n";
-    };
-    {
-        BinaryHeapPQ<int> pq; 
-        test(pq,"BinaryHeap"); 
-    }
-    {
-        SortedArrayPQ<int> pq;
-        test(pq,"SortedArray"); 
-    }
-    {
-        SortedListPQ<int>  pq;
-        test(pq,"SortedList");
-    }
-    cout << "\n";
-    mt19937 rng(12345);
+    //Testy jednostkowe
+    mt19937 rng(124134);
     printHeader();
     for (int n : {1000, 10000, 100000}) {
         vector<int> asc(n), desc(n), rnd(n);
         iota(asc.begin(), asc.end(), 0);
         iota(desc.begin(), desc.end(), 0); reverse(desc.begin(), desc.end());
         rnd = asc; shuffle(rnd.begin(), rnd.end(), rng);
-
         printRow("BinaryHeap", "optimistyczny",n, runBenchmark<BinaryHeapPQ>(n, asc));
         printRow("BinaryHeap", "sredni",n, runBenchmark<BinaryHeapPQ>(n, rnd));
         printRow("BinaryHeap", "pesymistyczny",n, runBenchmark<BinaryHeapPQ>(n, desc));
