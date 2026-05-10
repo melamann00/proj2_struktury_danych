@@ -1,8 +1,3 @@
-/**
- * Struktury Danych – Projekt 2: Kolejki priorytetowe
- * Implementacje: BinaryHeap, SortedArray, SortedList
- */
-
 #include <iostream>
 #include <vector>
 #include <list>
@@ -22,7 +17,6 @@ template<typename T>
 class BinaryHeapPQ {
     struct Node { T value; int priority; };
     vector<Node> h;
-
     void siftUp(int i) {
         for (int p; i > 0 && h[p=(i-1)/2].priority < h[i].priority; i=p)
             swap(h[i], h[p]);
@@ -46,9 +40,13 @@ public:
     bool empty()const            { return h.empty(); }
 
     void changePriority(T v, int p) {
-        for (int i=0; i<(int)h.size(); ++i)
-            if (h[i].value==v) { int old=h[i].priority; h[i].priority=p;
-                                  p>old ? siftUp(i) : siftDown(i); return; }
+        for (int i=0; i<(int)h.size(); i++)
+            if (h[i].value==v){ 
+                int old=h[i].priority;
+                h[i].priority=p
+                p>old ? siftUp(i) : siftDown(i); 
+                return; 
+            }
     }
 };
 template<typename T>
@@ -125,45 +123,52 @@ struct Result { long long push_us, pop_us, peek_ns, size_ns, change_us; };
 template<typename Fn>
 long long measureNs(Fn fn, int reps=200) {
     auto t0=Clock::now();
-    for(int i=0;i<reps;++i) fn();
+    for(int i=0;i<reps;i++) fn();
     return duration_cast<Nanos>(Clock::now()-t0).count()/reps;
 }
 
 template<template<typename> class PQ>
-Result runBenchmark(int n, const vector<int>& order) {
+Result Test(int n, const vector<int>& order) {
     Result r{};
     // push
-    { PQ<int> pq;
-      auto t0=Clock::now();
-      for(int i=0;i<n;++i) {
-        pq.push(i,order[i]);
-      }
-      r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); 
+    { 
+        PQ<int> pq;
+        auto t0=Clock::now();
+        for(int i=0;i<n;i++) {
+            pq.push(i,order[i]);
+        }
+        r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); 
     }
     //wypełniona kolejka do pozostałych testów
     PQ<int> pq;
-    for(int i=0;i<n;++i) {
+    for(int i=0;i<n;i++) {
         pq.push(i,order[i]);
     }
     r.peek_ns  = measureNs([&]{ volatile auto x=pq.peek();  (void)x; });
     r.size_ns  = measureNs([&]{ volatile int  s=pq.size();  (void)s; });
     //changePriority
-    { auto t0=Clock::now();
-      for(int rep=0;rep<10;++rep) {
-        pq.changePriority(n/2, 2'000'000+rep);
-      }
-      r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10; }
-
-    // pop
-    { PQ<int> pq2; for(int i=0;i<n;++i) pq2.push(i,order[i]);
-      auto t0=Clock::now();
-      while(!pq2.empty()) pq2.pop();
-      r.pop_us=duration_cast<Micros>(Clock::now()-t0).count(); }
-
+    {
+        auto t0=Clock::now();
+        for(int rep=0;rep<10;++rep) {
+            pq.changePriority(n/2, 2'000'000+rep);
+        }
+        r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10; 
+    }
+    //pop
+    { 
+        PQ<int> pq2; 
+        for(int i=0;i<n;i++){
+            pq2.push(i,order[i]);
+        }
+        auto t0=Clock::now();
+        while(!pq2.empty()){
+            pq2.pop();
+        }
+        r.pop_us=duration_cast<Micros>(Clock::now()-t0).count(); 
+    }
     return r;
 }
-
-//  Wydruk
+//Wyswietlanie
 void printHeader() {
     cout <<"Struktura   Przypadek        N        push [µs]     pop [µs]      peek [ns]     size [ns]     chgPri [µs]\n";
 }
@@ -180,15 +185,15 @@ int main() {
         iota(asc.begin(), asc.end(), 0);
         iota(desc.begin(), desc.end(), 0); reverse(desc.begin(), desc.end());
         rnd = asc; shuffle(rnd.begin(), rnd.end(), rng);
-        printRow("BinaryHeap", "optimistyczny",n, runBenchmark<BinaryHeapPQ>(n, asc));
-        printRow("BinaryHeap", "sredni",n, runBenchmark<BinaryHeapPQ>(n, rnd));
-        printRow("BinaryHeap", "pesymistyczny",n, runBenchmark<BinaryHeapPQ>(n, desc));
-        printRow("SortedArray", "optimistyczny",n, runBenchmark<SortedArrayPQ>(n, asc));
-        printRow("SortedArray", "sredni",n, runBenchmark<SortedArrayPQ>(n, rnd));
-        printRow("SortedArray", "pesymistyczny",n, runBenchmark<SortedArrayPQ>(n, desc));
-        printRow("SortedList", "optimistyczny",n, runBenchmark<SortedListPQ>(n, desc));
-        printRow("SortedList", "sredni",n, runBenchmark<SortedListPQ>(n, rnd));
-        printRow("SortedList", "pesymistyczny",n, runBenchmark<SortedListPQ>(n, asc));
+        printRow("BinaryHeap", "optimistyczny",n, Test<BinaryHeapPQ>(n, asc));
+        printRow("BinaryHeap", "sredni",n, Test<BinaryHeapPQ>(n, rnd));
+        printRow("BinaryHeap", "pesymistyczny",n, Test<BinaryHeapPQ>(n, desc));
+        printRow("SortedArray", "optimistyczny",n, Test<SortedArrayPQ>(n, asc));
+        printRow("SortedArray", "sredni",n, Test<SortedArrayPQ>(n, rnd));
+        printRow("SortedArray", "pesymistyczny",n, Test<SortedArrayPQ>(n, desc));
+        printRow("SortedList", "optimistyczny",n, Test<SortedListPQ>(n, desc));
+        printRow("SortedList", "sredni",n, Test<SortedListPQ>(n, rnd));
+        printRow("SortedList", "pesymistyczny",n, Test<SortedListPQ>(n, asc));
         cout<<"\n";
     }
 
