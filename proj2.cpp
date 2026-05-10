@@ -15,20 +15,31 @@ using Nanos  = nanoseconds;
 
 template<typename T>
 class BinaryHeapPQ {
-    struct Node { T value; int priority; };
+    struct Node{
+        T value;
+        int priority;
+    };
     vector<Node> h;
-    void siftUp(int i) {
-        for (int p; i > 0 && h[p=(i-1)/2].priority < h[i].priority; i=p)
+    void siftUp(int i){
+        for (int p; i > 0 && h[p=(i-1)/2].priority < h[i].priority; i=p){
             swap(h[i], h[p]);
+        }
     }
     void siftDown(int i) {
         int n = h.size();
         for (;;) {
             int best = i, l = 2*i+1, r = 2*i+2;
-            if (l < n && h[l].priority > h[best].priority) best = l;
-            if (r < n && h[r].priority > h[best].priority) best = r;
-            if (best == i) break;
-            swap(h[i], h[best]); i = best;
+            if (l < n && h[l].priority > h[best].priority){
+                best = l;
+            }
+            if (r < n && h[r].priority > h[best].priority){
+                best = r;
+            }
+            if (best == i){
+                break;
+            }
+            swap(h[i], h[best]); 
+            i = best;
         }
     }
 
@@ -43,7 +54,7 @@ public:
         for (int i=0; i<(int)h.size(); i++)
             if (h[i].value==v){ 
                 int old=h[i].priority;
-                h[i].priority=p
+                h[i].priority=p; 
                 p>old ? siftUp(i) : siftDown(i); 
                 return; 
             }
