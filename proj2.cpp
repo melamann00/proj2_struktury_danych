@@ -9,9 +9,9 @@
 #include <cassert>
 using namespace std;
 using namespace chrono;
-using Clock  = high_resolution_clock;
+using Clock = high_resolution_clock;
 using Micros = microseconds;
-using Nanos  = nanoseconds;
+using Nanos = nanoseconds;
 
 template<typename T>
 class BinaryHeapPQ {
@@ -97,7 +97,6 @@ public:
     bool empty() const{ 
         return arr.empty();
     }
-
     void changePriority(T v, int p) {
         for (auto it=arr.begin(); it!=arr.end(); ++it){
             if (it->value==v) {
@@ -134,10 +133,13 @@ public:
     bool empty() const{ 
         return lst.empty(); 
     }
-
     void changePriority(T v, int p) {
         for (auto it=lst.begin(); it!=lst.end(); ++it)
-            if (it->value==v) { lst.erase(it); push(v,p); return; }
+            if (it->value==v){ 
+                lst.erase(it);
+                push(v,p); 
+                return; 
+            }
     }
 };
 
@@ -147,7 +149,9 @@ struct Result { long long push_us, pop_us, peek_ns, size_ns, change_us; };
 template<typename Fn>
 long long measureNs(Fn fn, int reps=200) {
     auto t0=Clock::now();
-    for(int i=0;i<reps;i++) fn();
+    for(int i=0;i<reps;i++){
+        fn();
+    }
     return duration_cast<Nanos>(Clock::now()-t0).count()/reps;
 }
 
@@ -168,8 +172,8 @@ Result Test(int n, const vector<int>& order) {
     for(int i=0;i<n;i++) {
         pq.push(i,order[i]);
     }
-    r.peek_ns  = measureNs([&]{ volatile auto x=pq.peek();  (void)x; });
-    r.size_ns  = measureNs([&]{ volatile int s=pq.size();  (void)s; });
+    r.peek_ns = measureNs([&]{volatile auto x=pq.peek(); (void)x;});
+    r.size_ns = measureNs([&]{volatile int s=pq.size(); (void)s;});
     //changePriority
     {
         auto t0=Clock::now();
@@ -207,8 +211,10 @@ int main() {
     for (int n : {1000, 10000, 100000}) {
         vector<int> asc(n), desc(n), rnd(n);
         iota(asc.begin(), asc.end(), 0);
-        iota(desc.begin(), desc.end(), 0); reverse(desc.begin(), desc.end());
-        rnd = asc; shuffle(rnd.begin(), rnd.end(), rng);
+        iota(desc.begin(), desc.end(), 0); 
+        reverse(desc.begin(), desc.end());
+        rnd = asc; 
+        shuffle(rnd.begin(), rnd.end(), rng);
         printRow("BinaryHeap", "optimistyczny",n, Test<BinaryHeapPQ>(n, asc));
         printRow("BinaryHeap", "sredni",n, Test<BinaryHeapPQ>(n, rnd));
         printRow("BinaryHeap", "pesymistyczny",n, Test<BinaryHeapPQ>(n, desc));
