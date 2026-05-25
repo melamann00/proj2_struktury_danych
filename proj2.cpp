@@ -14,7 +14,7 @@ using Micros = microseconds;
 using Nanos = nanoseconds;
 
 template<typename T>
-class BinaryHeapPQ {
+class BinaryHeapPQ{
     struct Node{
         T value;
         int priority;
@@ -51,11 +51,13 @@ public:
     void pop(){
         h[0]=h.back();
         h.pop_back();
-        if(!h.empty()) {
+        if(!h.empty()){
             siftDown(0);
         }
     }
-    pair<T,int> peek()const { return {h[0].value, h[0].priority}; }
+    pair<T,int> peek()const {
+        return {h[0].value, h[0].priority};
+    }
     int size() const{
         return h.size();
     }
@@ -82,7 +84,9 @@ class SortedArrayPQ {
     vector<Node> arr;
 public:
     void push(T v, int p) {
-        auto it = lower_bound(arr.begin(), arr.end(), p, [](const Node& a, int b){ return a.priority < b; });
+        auto it = lower_bound(arr.begin(), arr.end(), p, [](const Node& a, int b){
+            return a.priority < b;
+        });
         arr.insert(it, {v,p});
     }
     void pop(){
@@ -110,8 +114,11 @@ public:
 
 template<typename T>
 class SortedListPQ {
-   struct Node { T value; int priority; };
-    list<Node> lst;
+   struct Node {
+       T value;
+       int priority;
+   };
+   list<Node> lst;
 
 public:
     void push(T v, int p) {
@@ -144,7 +151,9 @@ public:
 };
 
 //Test
-struct Result { long long push_us, pop_us, peek_ns, size_ns, change_us; };
+struct Result {
+    long long push_us, pop_us, peek_ns, size_ns, change_us;
+};
 
 template<typename Fn>
 long long measureNs(Fn fn, int reps=200) {
@@ -178,7 +187,7 @@ Result Test(int n, const vector<int>& order) {
     {
         auto t0=Clock::now();
         for(int rep=0;rep<10;++rep) {
-            pq.changePriority(n/2, 2'000'000+rep);
+            pq.changePriority(n/2, 2000000+rep);
         }
         r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10;
     }
