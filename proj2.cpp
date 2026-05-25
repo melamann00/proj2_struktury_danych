@@ -38,7 +38,7 @@ class BinaryHeapPQ {
             if (best == i){
                 break;
             }
-            swap(h[i], h[best]); 
+            swap(h[i], h[best]);
             i = best;
         }
     }
@@ -48,27 +48,27 @@ public:
         h.push_back({v,p});
         siftUp(h.size()-1);
     }
-    void pop(){ 
-        h[0]=h.back(); 
-        h.pop_back(); 
+    void pop(){
+        h[0]=h.back();
+        h.pop_back();
         if(!h.empty()) {
             siftDown(0);
-        } 
+        }
     }
     pair<T,int> peek()const { return {h[0].value, h[0].priority}; }
-    int size() const{ 
+    int size() const{
         return h.size();
     }
     bool empty() const{
-        return h.empty(); 
+        return h.empty();
     }
     void changePriority(T v, int p) {
         for (int i=0; i<(int)h.size(); i++){
-            if (h[i].value==v){ 
+            if (h[i].value==v){
                 int old=h[i].priority;
-                h[i].priority=p; 
-                p>old ? siftUp(i) : siftDown(i); 
-                return; 
+                h[i].priority=p;
+                p>old ? siftUp(i) : siftDown(i);
+                return;
             }
         }
     }
@@ -77,7 +77,7 @@ template<typename T>
 class SortedArrayPQ {
     struct Node {
         T value;
-        int priority; 
+        int priority;
     };
     vector<Node> arr;
 public:
@@ -89,12 +89,12 @@ public:
         arr.pop_back();
     }
     pair<T,int> peek() const {
-        return {arr.back().value, arr.back().priority}; 
+        return {arr.back().value, arr.back().priority};
     }
-    int  size() const{ 
+    int  size() const{
         return arr.size();
     }
-    bool empty() const{ 
+    bool empty() const{
         return arr.empty();
     }
     void changePriority(T v, int p) {
@@ -102,7 +102,7 @@ public:
             if (it->value==v) {
                 arr.erase(it);
                 push(v,p);
-                return; 
+                return;
             }
         }
     }
@@ -116,29 +116,29 @@ class SortedListPQ {
 public:
     void push(T v, int p) {
         auto it = lst.begin();
-        while (it!=lst.end() && it->priority>=p){ 
+        while (it!=lst.end() && it->priority>=p){
             ++it;
         };
         lst.insert(it, {v,p});
     }
-    void pop(){ 
-        lst.pop_front(); 
+    void pop(){
+        lst.pop_front();
     }
-    pair<T,int> peek() const { 
-        return {lst.front().value, lst.front().priority}; 
+    pair<T,int> peek() const {
+        return {lst.front().value, lst.front().priority};
     }
-    int size() const{ 
-        return lst.size(); 
+    int size() const{
+        return lst.size();
     }
-    bool empty() const{ 
-        return lst.empty(); 
+    bool empty() const{
+        return lst.empty();
     }
     void changePriority(T v, int p) {
         for (auto it=lst.begin(); it!=lst.end(); ++it)
-            if (it->value==v){ 
+            if (it->value==v){
                 lst.erase(it);
-                push(v,p); 
-                return; 
+                push(v,p);
+                return;
             }
     }
 };
@@ -159,13 +159,13 @@ template<template<typename> class PQ>
 Result Test(int n, const vector<int>& order) {
     Result r{};
     // push
-    { 
+    {
         PQ<int> pq;
         auto t0=Clock::now();
         for(int i=0;i<n;i++) {
             pq.push(i,order[i]);
         }
-        r.push_us=duration_cast<Micros>(Clock::now()-t0).count(); 
+        r.push_us=duration_cast<Micros>(Clock::now()-t0).count();
     }
     //wypełniona kolejka do pozostałych testów
     PQ<int> pq;
@@ -180,11 +180,11 @@ Result Test(int n, const vector<int>& order) {
         for(int rep=0;rep<10;++rep) {
             pq.changePriority(n/2, 2'000'000+rep);
         }
-        r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10; 
+        r.change_us=duration_cast<Micros>(Clock::now()-t0).count()/10;
     }
     //pop
-    { 
-        PQ<int> pq2; 
+    {
+        PQ<int> pq2;
         for(int i=0;i<n;i++){
             pq2.push(i,order[i]);
         }
@@ -192,7 +192,7 @@ Result Test(int n, const vector<int>& order) {
         while(!pq2.empty()){
             pq2.pop();
         }
-        r.pop_us=duration_cast<Micros>(Clock::now()-t0).count(); 
+        r.pop_us=duration_cast<Micros>(Clock::now()-t0).count();
     }
     return r;
 }
@@ -211,9 +211,9 @@ int main() {
     for (int n : {1000, 10000, 100000}) {
         vector<int> asc(n), desc(n), rnd(n);
         iota(asc.begin(), asc.end(), 0);
-        iota(desc.begin(), desc.end(), 0); 
+        iota(desc.begin(), desc.end(), 0);
         reverse(desc.begin(), desc.end());
-        rnd = asc; 
+        rnd = asc;
         shuffle(rnd.begin(), rnd.end(), rng);
         printRow("BinaryHeap", "optimistyczny",n, Test<BinaryHeapPQ>(n, asc));
         printRow("BinaryHeap", "sredni",n, Test<BinaryHeapPQ>(n, rnd));
@@ -226,6 +226,7 @@ int main() {
         printRow("SortedList", "pesymistyczny",n, Test<SortedListPQ>(n, asc));
         cout<<"\n";
     }
+
 
     cout << R"(
 Operacja          BinaryHeap      SortedArray     SortedList
